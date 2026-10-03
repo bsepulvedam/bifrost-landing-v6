@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#000000">
+  <meta
+    name="description"
+    content="Bifröst — Producción audiovisual y marketing."
+  >
+  <title>Bifröst</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="is-loading">
+
+  <!-- =========================
+       PRELOADER APROBADO
+  ========================== -->
+  <div class="preloader" id="preloader" aria-hidden="true">
+    <div class="preloader__glow"></div>
+
+    <img
+      class="preloader__logo"
+      src="assets/bifrost-logo.png"
+      alt=""
+      width="519"
+      height="457"
+    >
+
+    <div class="preloader__line"></div>
+  </div>
+
+  <!-- =========================
+       PÁGINA PRINCIPAL
+  ========================== -->
+  <div class="site" id="site">
+
+    <!-- Encabezado -->
+    <header class="site-header">
+      <div class="brand-area">
+        <a class="brand" href="index.html" aria-label="Bifröst, inicio">
+          <img
+            src="assets/bifrost-logo.png"
+            alt="Bifröst"
+            width="519"
+            height="457"
+          >
+        </a>
+
+        <a class="home-button" href="index.html">
+          Inicio
+        </a>
+      </div>
+
+      <nav class="main-nav" aria-label="Navegación principal">
+        <a href="producciones.html">Producciones audiovisuales + IA</a>
+        <a href="soluciones.html">Soluciones</a>
+        <a href="nosotros.html">Nosotros</a>
+        <a class="nav-cta" href="contacto.html">Contacto</a>
+      </nav>
+    </header>
+
+    <main>
+      <!-- Galería de clientes -->
+      <section class="clients" id="clientes" aria-labelledby="clients-title">
+        <div class="clients__heading">
+          <div>
+            <p class="section-kicker">Colaboraciones</p>
+            <h1 id="clients-title">Clientes</h1>
+          </div>
+
+          <div class="slider-controls" aria-label="Controles de la galería">
+            <button
+              class="slider-button"
+              id="previousClient"
+              type="button"
+              aria-label="Ver clientes anteriores"
+            >
+              <span aria-hidden="true">←</span>
+            </button>
+
+            <button
+              class="slider-button"
+              id="nextClient"
+              type="button"
+              aria-label="Ver clientes siguientes"
+            >
+              <span aria-hidden="true">→</span>
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="client-slider"
+          id="clientSlider"
+          tabindex="0"
+          aria-label="Galería desplazable de clientes"
+        >
+          <article class="client-card client-card--video">
+            <video
+              class="client-video"
+              src="assets/clientes/cliente-01.mp4"
+              poster="assets/clientes/cliente-01.jpg"
+              autoplay
+              muted
+              loop
+              playsinline
+              preload="metadata"
+              controls
+            >
+              Tu navegador no puede reproducir este video.
+            </video>
+          </article>
+
+          <article class="client-card client-card--wide">
+            <img
+              src="assets/clientes/cliente-02.jpg"
+              alt="Imagen temporal del cliente 02"
+              draggable="false"
+            >
+          </article>
+
+          <article class="client-card">
+            <img
+              src="assets/clientes/cliente-03.jpg"
+              alt="Imagen temporal del cliente 03"
+              draggable="false"
+            >
+          </article>
+
+          <article class="client-card client-card--wide">
+            <img
+              src="assets/clientes/cliente-04.jpg"
+              alt="Imagen temporal del cliente 04"
+              draggable="false"
+            >
+          </article>
+
+          <article class="client-card">
+            <img
+              src="assets/clientes/cliente-05.jpg"
+              alt="Imagen temporal del cliente 05"
+              draggable="false"
+            >
+          </article>
+        </div>
+
+        <p class="slider-hint">
+          Desliza, arrastra o utiliza las flechas para recorrer la galería.
+        </p>
+      </section>
+    </main>
+
+    <!-- Footer ilustrado -->
+    <footer class="site-footer" id="contacto">
+      <img
+        src="assets/bifrost-footer.png"
+        alt="Bifröst"
+        width="2048"
+        height="392"
+      >
+    </footer>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
