@@ -13,6 +13,27 @@
   --muted: rgba(245, 245, 243, 0.62);
   --transition-smooth: cubic-bezier(0.77, 0, 0.18, 1);
   --page-padding: clamp(22px, 5vw, 78px);
+
+  /* Lenguaje de movimiento: pequeño, inmediato y consistente */
+  --motion-fast: 160ms;
+  --motion-normal: 260ms;
+  --motion-slow: 420ms;
+  --ease-apple: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --reveal-distance: 10px;
+  --reveal-step: 60ms;
+  --preloader-fade: 600ms;
+
+  /* SF Pro solo se usa si ya está instalada en el sistema; no se distribuye */
+  --font-ui:
+    -apple-system,
+    BlinkMacSystemFont,
+    "SF Pro Display",
+    "SF Pro Text",
+    "Segoe UI",
+    Helvetica,
+    Arial,
+    sans-serif;
 }
 
 /* ==================================================
@@ -35,8 +56,10 @@ body {
   overflow-x: hidden;
   background: var(--black);
   color: var(--ink);
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: var(--font-ui);
+  font-weight: 400;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
 
@@ -57,6 +80,20 @@ button {
   font: inherit;
 }
 
+/* Sin JS no hay preloader ni bloques ocultos esperando el reveal */
+html:not(.js) .preloader {
+  display: none;
+}
+
+html:not(.js) body.is-loading {
+  overflow: visible;
+}
+
+/* Ya se vio el preloader en esta sesión: la navegación no lo repite */
+.skip-preloader .preloader {
+  display: none;
+}
+
 /* ==================================================
    PRELOADER APROBADO
 ================================================== */
@@ -71,8 +108,8 @@ button {
   opacity: 1;
   visibility: visible;
   transition:
-    opacity 850ms var(--transition-smooth),
-    visibility 0s linear 850ms;
+    opacity var(--preloader-fade) var(--ease-standard),
+    visibility 0s linear var(--preloader-fade);
 }
 
 .preloader::after {
@@ -213,16 +250,64 @@ button {
 .site {
   min-height: 100vh;
   background: var(--black);
-  opacity: 0;
-  transform: scale(1.012);
-  transition:
-    opacity 950ms var(--transition-smooth),
-    transform 1200ms var(--transition-smooth);
 }
 
-body.is-ready .site {
+/* Fade-out corto al abandonar la página (lo activa script.js) */
+.js .site {
+  transition: opacity var(--motion-fast) var(--ease-standard);
+}
+
+body.is-leaving .site {
+  opacity: 0;
+}
+
+/* Entrada: opacity + translateY leve, escalonada por bloque.
+   Usa transition (no animation) para no fijar transform y dejar libres los hover. */
+.js :is(
+  .site-header,
+  .clients__heading,
+  .page-hero__content,
+  .services-page__title,
+  .client-slider,
+  .services-list,
+  .slider-hint,
+  .site-footer
+) {
+  opacity: 0;
+  transform: translateY(var(--reveal-distance));
+  transition:
+    opacity var(--motion-slow) var(--ease-apple) calc(var(--i, 0) * var(--reveal-step)),
+    transform var(--motion-slow) var(--ease-apple) calc(var(--i, 0) * var(--reveal-step));
+}
+
+.js body.is-ready :is(
+  .site-header,
+  .clients__heading,
+  .page-hero__content,
+  .services-page__title,
+  .client-slider,
+  .services-list,
+  .slider-hint,
+  .site-footer
+) {
   opacity: 1;
-  transform: scale(1);
+  transform: none;
+}
+
+.clients__heading,
+.page-hero__content,
+.services-page__title {
+  --i: 1;
+}
+
+.client-slider,
+.services-list {
+  --i: 2;
+}
+
+.slider-hint,
+.site-footer {
+  --i: 3;
 }
 
 /* ==================================================
@@ -252,6 +337,14 @@ body.is-ready .site {
   flex: 0 0 auto;
   width: clamp(56px, 5vw, 76px);
   border-radius: 0;
+  transition:
+    opacity var(--motion-normal) var(--ease-apple),
+    transform var(--motion-fast) var(--ease-apple);
+}
+
+.brand:active {
+  opacity: 0.8;
+  transform: scale(0.98);
 }
 
 .brand img {
@@ -272,17 +365,24 @@ body.is-ready .site {
   text-decoration: none;
   font-size: clamp(0.76rem, 1vw, 0.9rem);
   font-weight: 500;
-  letter-spacing: 0.015em;
+  letter-spacing: 0.01em;
   transition:
-    color 240ms ease,
-    border-color 240ms ease,
-    background-color 240ms ease;
+    color var(--motion-normal) var(--ease-apple),
+    border-color var(--motion-normal) var(--ease-apple),
+    background-color var(--motion-normal) var(--ease-apple),
+    transform var(--motion-fast) var(--ease-apple);
 }
 
-.home-button:hover {
-  color: var(--white);
-  border-color: var(--line-strong);
-  background: rgba(255, 255, 255, 0.07);
+.home-button:active {
+  transform: scale(0.98);
+}
+
+@media (hover: hover) {
+  .home-button:hover {
+    color: var(--white);
+    border-color: var(--line-strong);
+    background: rgba(255, 255, 255, 0.07);
+  }
 }
 
 .brand:focus-visible,
@@ -322,13 +422,13 @@ body.is-ready .site {
   text-align: center;
   font-size: clamp(0.76rem, 1.05vw, 0.94rem);
   font-weight: 500;
-  letter-spacing: 0.015em;
+  letter-spacing: 0.01em;
   transition:
-    color 260ms ease,
-    transform 260ms ease,
-    border-color 260ms ease,
-    background-color 260ms ease,
-    box-shadow 260ms ease;
+    color var(--motion-normal) var(--ease-apple),
+    transform var(--motion-normal) var(--ease-apple),
+    border-color var(--motion-normal) var(--ease-apple),
+    background-color var(--motion-normal) var(--ease-apple),
+    box-shadow var(--motion-normal) var(--ease-apple);
 }
 
 .main-nav a::before {
@@ -339,19 +439,28 @@ body.is-ready .site {
   background:
     linear-gradient(100deg, #66dfff, #c5f2da 32%, #ffd0d9 63%, #9b6dff);
   transform: translateY(105%);
-  transition: transform 340ms var(--transition-smooth);
+  transition: transform var(--motion-slow) var(--ease-apple);
 }
 
-.main-nav a:hover,
 .main-nav a[aria-current="page"] {
   color: #050505;
   border-color: transparent;
-  transform: translateY(-2px);
 }
 
-.main-nav a:hover::before,
 .main-nav a[aria-current="page"]::before {
   transform: translateY(0);
+}
+
+@media (hover: hover) {
+  .main-nav a:hover {
+    color: #050505;
+    border-color: transparent;
+    transform: translateY(-2px);
+  }
+
+  .main-nav a:hover::before {
+    transform: translateY(0);
+  }
 }
 
 /* Contacto queda permanentemente iluminado */
@@ -369,14 +478,21 @@ body.is-ready .site {
   display: none;
 }
 
-.main-nav .nav-cta:hover,
-.main-nav .nav-cta[aria-current="page"] {
-  color: #050505;
-  transform: translateY(-3px) scale(1.015);
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.14),
-    0 0 38px rgba(102, 223, 255, 0.28),
-    0 0 55px rgba(155, 109, 255, 0.22);
+@media (hover: hover) {
+  .main-nav .nav-cta:hover {
+    transform: translateY(-2px) scale(1.01);
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.14),
+      0 0 38px rgba(102, 223, 255, 0.28),
+      0 0 55px rgba(155, 109, 255, 0.22);
+  }
+}
+
+/* Pulsación: pequeña presión física (también en touch) */
+.main-nav a:active,
+.main-nav .nav-cta:active {
+  transform: scale(0.98);
+  transition-duration: var(--motion-fast);
 }
 
 /* ==================================================
@@ -415,8 +531,8 @@ body.is-ready .site {
   margin: 0;
   color: var(--ink);
   font-size: clamp(1.8rem, 4.8vw, 4.56rem);
-  font-weight: 400;
-  letter-spacing: -0.068em;
+  font-weight: 600;
+  letter-spacing: -0.05em;
   line-height: 0.9;
 }
 
@@ -437,17 +553,24 @@ body.is-ready .site {
   cursor: pointer;
   font-size: 1.25rem;
   transition:
-    background-color 220ms ease,
-    color 220ms ease,
-    border-color 220ms ease,
-    transform 220ms ease;
+    background-color var(--motion-normal) var(--ease-apple),
+    color var(--motion-normal) var(--ease-apple),
+    border-color var(--motion-normal) var(--ease-apple),
+    opacity var(--motion-normal) var(--ease-apple),
+    transform var(--motion-fast) var(--ease-apple);
 }
 
-.slider-button:hover {
-  background: var(--ink);
-  color: var(--black);
-  border-color: var(--ink);
-  transform: scale(1.04);
+@media (hover: hover) {
+  .slider-button:not(:disabled):hover {
+    background: var(--ink);
+    color: var(--black);
+    border-color: var(--ink);
+    transform: scale(1.04);
+  }
+}
+
+.slider-button:not(:disabled):active {
+  transform: scale(0.96);
 }
 
 .slider-button:disabled {
@@ -460,10 +583,12 @@ body.is-ready .site {
   grid-auto-flow: column;
   grid-auto-columns: clamp(270px, 36vw, 540px);
   gap: clamp(14px, 2vw, 28px);
+  /* 8px arriba (compensados con margin) para que el scale del hover no se recorte */
   padding:
-    0
+    8px
     var(--page-padding)
     18px;
+  margin-top: -8px;
   overflow-x: auto;
   overscroll-behavior-inline: contain;
   scroll-behavior: smooth;
@@ -492,6 +617,10 @@ body.is-ready .site {
   background: var(--surface-soft);
   scroll-snap-align: start;
   transform: translateZ(0);
+  transition:
+    transform var(--motion-normal) var(--ease-apple),
+    box-shadow var(--motion-normal) var(--ease-apple),
+    border-color var(--motion-normal) var(--ease-apple);
 }
 
 .client-card--wide {
@@ -502,7 +631,6 @@ body.is-ready .site {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 700ms var(--transition-smooth);
 }
 
 .client-video {
@@ -513,8 +641,17 @@ body.is-ready .site {
   background: #000000;
 }
 
-.client-card:hover img {
-  transform: scale(1.035);
+/* La card se mueve entera (contenedor + imagen/video), como una sola unidad */
+@media (hover: hover) {
+  .client-card:hover {
+    transform: scale(1.015);
+    border-color: var(--line-strong);
+    box-shadow: 0 14px 30px -14px rgba(0, 0, 0, 0.9);
+  }
+}
+
+.client-slider.is-dragging .client-card {
+  transform: scale(0.995);
 }
 
 .slider-hint {
@@ -524,6 +661,7 @@ body.is-ready .site {
     0;
   color: var(--muted);
   font-size: 0.78rem;
+  font-weight: 400;
 }
 
 
@@ -561,8 +699,8 @@ body.is-ready .site {
   margin: 0;
   color: var(--ink);
   font-size: clamp(4rem, 12vw, 11rem);
-  font-weight: 400;
-  letter-spacing: -0.075em;
+  font-weight: 600;
+  letter-spacing: -0.055em;
   line-height: 0.82;
 }
 
@@ -577,8 +715,8 @@ body.is-ready .site {
   margin: 0 0 clamp(70px, 10vw, 130px);
   color: var(--ink);
   font-size: clamp(4rem, 12vw, 11rem);
-  font-weight: 400;
-  letter-spacing: -0.075em;
+  font-weight: 600;
+  letter-spacing: -0.055em;
   line-height: 0.82;
 }
 
@@ -595,12 +733,17 @@ body.is-ready .site {
   border-bottom: 1px solid var(--line);
   color: var(--ink);
   font-size: clamp(1.6rem, 4vw, 4.2rem);
-  font-weight: 400;
-  letter-spacing: -0.045em;
+  font-weight: 600;
+  letter-spacing: -0.035em;
   line-height: 1;
 }
 
 @media (max-width: 720px) {
+  :root {
+    --reveal-distance: 6px;
+    --reveal-step: 40ms;
+  }
+
   .site-header {
     align-items: flex-start;
     gap: 24px;
@@ -710,12 +853,41 @@ body.is-ready .site {
    ACCESIBILIDAD
 ================================================== */
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
   *,
   *::before,
   *::after {
     scroll-behavior: auto !important;
     animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 1ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  /* Contenido visible desde el inicio, sin transforms de entrada */
+  .js :is(
+    .site-header,
+    .clients__heading,
+    .page-hero__content,
+    .services-page__title,
+    .client-slider,
+    .services-list,
+    .slider-hint,
+    .site-footer
+  ) {
+    opacity: 1;
+    transform: none;
+  }
+
+  .client-card:hover,
+  .client-slider.is-dragging .client-card,
+  .main-nav a:hover,
+  .main-nav .nav-cta:hover,
+  .slider-button:hover {
+    transform: none;
   }
 }

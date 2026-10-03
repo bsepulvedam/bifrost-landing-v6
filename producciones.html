@@ -9,6 +9,14 @@
     content="Bifröst — Producciones audiovisuales + IA."
   >
   <title>Producciones audiovisuales + IA | Bifröst</title>
+  <script>
+    document.documentElement.classList.add("js");
+    try {
+      if (sessionStorage.getItem("bifrost:seen")) {
+        document.documentElement.classList.add("skip-preloader");
+      }
+    } catch (e) {}
+  </script>
   <link rel="stylesheet" href="styles.css">
 </head>
 
