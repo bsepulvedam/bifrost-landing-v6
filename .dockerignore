@@ -1,0 +1,17 @@
+**
+!Dockerfile
+!index.html
+!producciones.html
+!soluciones.html
+!nosotros.html
+!contacto.html
+!styles.css
+!script.js
+!assets/bifrost-logo.png
+!assets/bifrost-footer.png
+!assets/clientes/cliente-01.jpg
+!assets/clientes/cliente-02.jpg
+!assets/clientes/cliente-03.jpg
+!assets/clientes/cliente-04.jpg
+!assets/clientes/cliente-05.jpg
+!deploy/nginx.conf

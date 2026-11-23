@@ -9,35 +9,12 @@
     content="Bifröst — Producción audiovisual y marketing."
   >
   <title>Bifröst</title>
-  <script>
-    document.documentElement.classList.add("js");
-    try {
-      if (sessionStorage.getItem("bifrost:seen")) {
-        document.documentElement.classList.add("skip-preloader");
-      }
-    } catch (e) {}
-  </script>
   <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
 </head>
 
-<body class="is-loading">
-
-  <!-- =========================
-       PRELOADER APROBADO
-  ========================== -->
-  <div class="preloader" id="preloader" aria-hidden="true">
-    <div class="preloader__glow"></div>
-
-    <img
-      class="preloader__logo"
-      src="assets/bifrost-logo.png"
-      alt=""
-      width="519"
-      height="457"
-    >
-
-    <div class="preloader__line"></div>
-  </div>
+<body>
+  <a class="skip-link" href="#contenido">Saltar al contenido principal</a>
 
   <!-- =========================
        PÁGINA PRINCIPAL
@@ -46,20 +23,17 @@
 
     <!-- Encabezado -->
     <header class="site-header">
-      <div class="brand-area">
-        <a class="brand" href="index.html" aria-label="Bifröst, inicio">
+      <a class="brand-area" href="index.html" aria-label="Bifröst, inicio" aria-current="page">
+        <span class="brand">
           <img
             src="assets/bifrost-logo.png"
-            alt="Bifröst"
+            alt=""
             width="519"
             height="457"
           >
-        </a>
-
-        <a class="home-button" href="index.html">
-          Inicio
-        </a>
-      </div>
+        </span>
+        <span class="home-button">Inicio</span>
+      </a>
 
       <nav class="main-nav" aria-label="Navegación principal">
         <a href="producciones.html">Producciones audiovisuales + IA</a>
@@ -69,7 +43,7 @@
       </nav>
     </header>
 
-    <main>
+    <main id="contenido" tabindex="-1">
       <!-- Galería de clientes -->
       <section class="clients" id="clientes" aria-labelledby="clients-title">
         <div class="clients__heading">
@@ -78,12 +52,14 @@
             <h1 id="clients-title">Clientes</h1>
           </div>
 
-          <div class="slider-controls" aria-label="Controles de la galería">
+          <div class="slider-controls" role="group" aria-label="Controles de la galería" hidden>
             <button
               class="slider-button"
               id="previousClient"
               type="button"
               aria-label="Ver clientes anteriores"
+              aria-controls="clientSlider"
+              aria-disabled="true"
             >
               <span aria-hidden="true">←</span>
             </button>
@@ -93,6 +69,8 @@
               id="nextClient"
               type="button"
               aria-label="Ver clientes siguientes"
+              aria-controls="clientSlider"
+              aria-disabled="true"
             >
               <span aria-hidden="true">→</span>
             </button>
@@ -103,7 +81,9 @@
           class="client-slider"
           id="clientSlider"
           tabindex="0"
+          role="group"
           aria-label="Galería desplazable de clientes"
+          aria-describedby="sliderHint"
         >
           <article class="client-card client-card--video">
             <video
@@ -154,7 +134,7 @@
           </article>
         </div>
 
-        <p class="slider-hint">
+        <p class="slider-hint" id="sliderHint">
           Desliza, arrastra o utiliza las flechas para recorrer la galería.
         </p>
       </section>
@@ -164,7 +144,7 @@
     <footer class="site-footer" id="contacto">
       <img
         src="assets/bifrost-footer.png"
-        alt="Bifröst"
+        alt=""
         width="2048"
         height="392"
       >
@@ -172,6 +152,5 @@
 
   </div>
 
-  <script src="script.js"></script>
 </body>
 </html>

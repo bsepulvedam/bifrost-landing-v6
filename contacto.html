@@ -9,48 +9,26 @@
     content="Bifröst — Contacto."
   >
   <title>Contacto | Bifröst</title>
-  <script>
-    document.documentElement.classList.add("js");
-    try {
-      if (sessionStorage.getItem("bifrost:seen")) {
-        document.documentElement.classList.add("skip-preloader");
-      }
-    } catch (e) {}
-  </script>
   <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
 </head>
 
-<body class="is-loading">
-  <div class="preloader" id="preloader" aria-hidden="true">
-    <div class="preloader__glow"></div>
-
-    <img
-      class="preloader__logo"
-      src="assets/bifrost-logo.png"
-      alt=""
-      width="519"
-      height="457"
-    >
-
-    <div class="preloader__line"></div>
-  </div>
+<body>
+  <a class="skip-link" href="#contenido">Saltar al contenido principal</a>
 
   <div class="site inner-page" id="site">
     <header class="site-header">
-      <div class="brand-area">
-        <a class="brand" href="index.html" aria-label="Bifröst, inicio">
+      <a class="brand-area" href="index.html" aria-label="Bifröst, inicio">
+        <span class="brand">
           <img
             src="assets/bifrost-logo.png"
-            alt="Bifröst"
+            alt=""
             width="519"
             height="457"
           >
-        </a>
-
-        <a class="home-button" href="index.html">
-          Inicio
-        </a>
-      </div>
+        </span>
+        <span class="home-button">Inicio</span>
+      </a>
 
       <nav class="main-nav" aria-label="Navegación principal">
         <a href="producciones.html">Producciones audiovisuales + IA</a>
@@ -60,7 +38,7 @@
       </nav>
     </header>
 
-    <main>
+    <main id="contenido" tabindex="-1">
       <section class="page-hero" aria-labelledby="page-title">
         <div class="page-hero__content">
           <h1 id="page-title">Contacto</h1>
@@ -71,13 +49,12 @@
     <footer class="site-footer">
       <img
         src="assets/bifrost-footer.png"
-        alt="Bifröst"
+        alt=""
         width="2048"
         height="392"
       >
     </footer>
   </div>
 
-  <script src="script.js"></script>
 </body>
 </html>

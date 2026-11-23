@@ -1,0 +1,39 @@
+name: Frontend V1
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    branches: [develop, main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - run: node --check script.js
+      - run: node scripts/validate-frontend.mjs
+      - name: Probar el contenedor localmente en el runner
+        run: |
+          docker build -t bifrost-ci .
+          docker run --rm -d --name bifrost-ci -p 127.0.0.1::8080 bifrost-ci
+          trap 'docker stop bifrost-ci' EXIT
+          docker exec bifrost-ci nginx -t
+          origin="http://$(docker port bifrost-ci 8080/tcp)"
+          curl -fsS --retry 5 --retry-connrefused "$origin/healthz"
+          curl -fsSI "$origin/" | tee /tmp/bifrost-headers
+          grep -qi '^content-type: text/html' /tmp/bifrost-headers
+          grep -qi '^content-security-policy: ' /tmp/bifrost-headers
+          grep -qi '^x-content-type-options: nosniff' /tmp/bifrost-headers
+          for file in producciones.html soluciones.html nosotros.html contacto.html styles.css script.js assets/bifrost-logo.png; do
+            curl -fsS -o /dev/null "$origin/$file"
+          done
+          for path in .git/config .env crm/ DEPLOY_BIFROST.md AUDITORIA_BIFROST_V1.md INVENTARIO_MEDIA_BIFROST.md ruta-inexistente; do
+            test "$(curl -sS -o /dev/null -w '%{http_code}' "$origin/$path")" = "404"
+          done
