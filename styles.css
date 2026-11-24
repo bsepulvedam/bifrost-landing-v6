@@ -146,59 +146,25 @@ button {
   }
 }
 
-.home-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 39px;
-  padding: 8px clamp(14px, 1.8vw, 24px);
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.02);
-  color: var(--muted);
-  text-decoration: none;
-  font-size: clamp(0.76rem, 1vw, 0.9rem);
-  font-weight: 500;
-  letter-spacing: 0.01em;
-  transition:
-    color var(--motion-normal) var(--ease-apple),
-    border-color var(--motion-normal) var(--ease-apple),
-    background-color var(--motion-normal) var(--ease-apple),
-    transform var(--motion-fast) var(--ease-apple);
-}
-
-.brand-area:active .home-button {
-  transform: scale(0.98);
-}
-
-@media (hover: hover) {
-  .brand-area:hover .home-button {
-    color: var(--white);
-    border-color: var(--line-strong);
-    background: rgba(255, 255, 255, 0.07);
-  }
-}
-
 .skip-link:focus-visible,
 .brand-area:focus-visible,
 .main-nav a:focus-visible,
+.home-links a:focus-visible,
+.client-index a:focus-visible,
 .slider-button:focus-visible,
-.client-slider:focus,
+.client-slider:focus-visible,
+.client-card:focus-visible,
 .client-video:focus-visible,
 main[tabindex]:focus-visible {
   outline: 2px solid var(--white);
   outline-offset: 5px;
 }
 
-.client-slider:focus,
+.client-slider:focus-visible,
+.client-card:focus-visible,
 .client-video:focus-visible,
 main[tabindex]:focus-visible {
   outline-offset: -3px;
-}
-
-.brand-area[aria-current="page"] .home-button {
-  border-color: var(--line-strong);
-  color: var(--ink);
 }
 
 .main-nav {
@@ -213,7 +179,9 @@ main[tabindex]:focus-visible {
   padding-top: clamp(5px, 1vw, 14px);
 }
 
-.main-nav a {
+.main-nav a,
+.home-links a,
+.client-index a {
   position: relative;
   z-index: 0;
   display: inline-flex;
@@ -270,6 +238,11 @@ main[tabindex]:focus-visible {
   .main-nav a:hover::before {
     transform: translateY(0);
   }
+
+  .home-links a:hover,
+  .client-index a:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
 }
 
 /* Contacto queda permanentemente iluminado */
@@ -308,11 +281,7 @@ main[tabindex]:focus-visible {
    SECCIÓN CLIENTES
 ================================================== */
 .clients {
-  padding:
-    clamp(58px, 9vw, 128px)
-    0
-    clamp(78px, 11vw, 155px);
-  overflow: hidden;
+  padding-block-start: clamp(34px, 6vw, 88px);
   background:
     radial-gradient(circle at 82% 12%, rgba(115, 82, 255, 0.08), transparent 24%),
     var(--black);
@@ -324,19 +293,11 @@ main[tabindex]:focus-visible {
   justify-content: space-between;
   gap: 24px;
   padding: 0 var(--page-padding);
-  margin-bottom: clamp(25px, 4vw, 50px);
+  margin-bottom: clamp(20px, 3vw, 36px);
 }
 
-.section-kicker {
-  margin: 0 0 10px;
-  color: var(--muted);
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.19em;
-  text-transform: uppercase;
-}
-
-.clients h1 {
+.clients h1,
+.client-projects h1 {
   margin: 0;
   color: var(--ink);
   font-size: clamp(1.8rem, 4.8vw, 4.56rem);
@@ -357,15 +318,15 @@ main[tabindex]:focus-visible {
 
 .slider-button {
   display: grid;
-  width: 48px;
-  height: 48px;
+  min-height: 44px;
+  padding-inline: clamp(9px, 1.4vw, 18px);
   place-items: center;
   border: 1px solid var(--line-strong);
-  border-radius: 50%;
+  border-radius: 999px;
   background: var(--surface);
   color: var(--ink);
   cursor: pointer;
-  font-size: 1.25rem;
+  font-size: 0.78rem;
   transition:
     background-color var(--motion-normal) var(--ease-apple),
     color var(--motion-normal) var(--ease-apple),
@@ -396,14 +357,9 @@ main[tabindex]:focus-visible {
 .client-slider {
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: clamp(270px, 36vw, 540px);
-  gap: clamp(14px, 2vw, 28px);
-  /* 8px arriba (compensados con margin) para que el scale del hover no se recorte */
-  padding:
-    8px
-    var(--page-padding)
-    18px;
-  margin-top: -8px;
+  grid-auto-columns: clamp(270px, 33vw, 520px);
+  gap: 6px;
+  padding: 0 var(--page-padding) 12px;
   overflow-x: auto;
   overscroll-behavior-inline: contain;
   scroll-behavior: smooth;
@@ -423,48 +379,57 @@ main[tabindex]:focus-visible {
 
 .client-card {
   position: relative;
-  aspect-ratio: 4 / 3;
+  display: grid;
+  place-items: center;
+  isolation: isolate;
+  aspect-ratio: 16 / 10;
   overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: clamp(18px, 2vw, 30px);
+  border-radius: 4px;
   background: var(--surface-soft);
   scroll-snap-align: start;
-  transform: translateZ(0);
-  transition:
-    transform var(--motion-normal) var(--ease-apple),
-    box-shadow var(--motion-normal) var(--ease-apple),
-    border-color var(--motion-normal) var(--ease-apple);
+  cursor: inherit;
 }
 
-.client-card--wide {
-  aspect-ratio: 16 / 10;
+.client-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.28), transparent 10%, transparent 90%, rgba(0, 0, 0, 0.28)),
+    rgba(0, 0, 0, 0.12);
+  pointer-events: none;
+  transition: background-color var(--motion-normal) var(--ease-apple);
 }
 
-.client-card img {
+.client-card__poster {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform var(--motion-normal) var(--ease-apple);
 }
 
-.client-video {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  background: #000000;
+.client-card__logo {
+  z-index: 1;
+  width: 70%;
+  height: auto;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.8));
 }
 
-/* La card se mueve entera (contenedor + imagen/video), como una sola unidad */
 @media (hover: hover) {
-  .client-card:hover {
-    transform: scale(1.015);
-    border-color: var(--line-strong);
-    box-shadow: 0 14px 30px -14px rgba(0, 0, 0, 0.9);
+  .client-slider:not(.is-dragging) .client-card:hover .client-card__poster {
+    transform: scale(1.03);
+  }
+
+  .client-card:hover::after {
+    background-color: rgba(0, 0, 0, 0.23);
   }
 }
 
-.client-slider.is-dragging .client-card {
-  transform: scale(0.995);
+.client-card:focus-visible {
+  z-index: 2;
 }
 
 .slider-hint {
@@ -477,6 +442,64 @@ main[tabindex]:focus-visible {
   font-weight: 400;
 }
 
+.home-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: clamp(24px, 4vw, 44px) var(--page-padding) clamp(44px, 8vw, 106px);
+}
+
+.home-links a,
+.client-index a {
+  min-height: 44px;
+  overflow-wrap: normal;
+}
+
+.client-projects {
+  width: min(100%, 1140px);
+  margin-inline: auto;
+  padding: clamp(38px, 6vw, 86px) var(--page-padding) clamp(60px, 9vw, 136px);
+}
+
+.client-index {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: clamp(20px, 3vw, 36px) 0 clamp(36px, 7vw, 78px);
+  padding: 0;
+  list-style: none;
+}
+
+.client-project {
+  scroll-margin-block-start: 20px;
+  margin-block-start: clamp(28px, 6vw, 68px);
+  padding-block-start: clamp(16px, 3vw, 28px);
+  border-top: 1px solid var(--line);
+}
+
+.client-project h2 {
+  margin: 0 0 14px;
+  font-size: clamp(1.45rem, 3.25vw, 2.75rem);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+}
+
+.client-video {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  background: var(--surface);
+}
+
+.client-video-status {
+  margin: 8px 0 0;
+  color: var(--muted);
+}
+
+.client-video-status:empty {
+  margin: 0;
+}
 
 /* ==================================================
    PÁGINAS INTERNAS
@@ -566,12 +589,6 @@ main[tabindex]:focus-visible {
     gap: 9px;
   }
 
-  .home-button {
-    min-height: 36px;
-    padding: 7px 12px;
-    font-size: 0.72rem;
-  }
-
   .main-nav {
     max-width: 520px;
     gap: 6px;
@@ -579,22 +596,17 @@ main[tabindex]:focus-visible {
   }
 
   .main-nav a {
-    min-height: 38px;
+    min-height: 44px;
     padding: 8px 11px;
-    font-size: 0.7rem;
+    font-size: 0.78rem;
   }
 
   .clients__heading {
     align-items: center;
   }
 
-  .slider-button {
-    width: 42px;
-    height: 42px;
-  }
-
   .client-slider {
-    grid-auto-columns: min(82vw, 420px);
+    grid-auto-columns: min(80vw, 420px);
   }
 
   .page-hero {
@@ -642,7 +654,8 @@ main[tabindex]:focus-visible {
   }
 
   .main-nav a {
-    flex: 1 1 calc(50% - 6px);
+    flex: 1 1 calc((100% - 12px) / 3);
+    padding-inline: 6px;
   }
 
   .clients__heading {
@@ -674,8 +687,7 @@ main[tabindex]:focus-visible {
     transition-delay: 0ms !important;
   }
 
-  .client-card:hover,
-  .client-slider.is-dragging .client-card,
+  .client-slider:not(.is-dragging) .client-card:hover .client-card__poster,
   .main-nav a:hover,
   .main-nav .nav-cta:hover,
   .slider-button:hover {

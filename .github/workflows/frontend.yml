@@ -31,8 +31,13 @@ jobs:
           grep -qi '^content-type: text/html' /tmp/bifrost-headers
           grep -qi '^content-security-policy: ' /tmp/bifrost-headers
           grep -qi '^x-content-type-options: nosniff' /tmp/bifrost-headers
-          for file in producciones.html soluciones.html nosotros.html contacto.html styles.css script.js assets/bifrost-logo.png; do
+          for file in producciones.html soluciones.html nosotros.html clientes.html contacto.html styles.css script.js assets/bifrost-logo.png; do
             curl -fsS -o /dev/null "$origin/$file"
+          done
+          for client in adidas samsung hbo-max salcobrand score; do
+            curl -fsS -o /dev/null "$origin/assets/clientes/posters/$client.webp"
+            curl -fsS -o /dev/null "$origin/assets/clientes/logos/$client.svg"
+            test "$(curl -sS -o /dev/null -w '%{http_code}' "$origin/assets/clientes/videos/$client.mp4")" = "404"
           done
           for path in .git/config .env crm/ DEPLOY_BIFROST.md AUDITORIA_BIFROST_V1.md INVENTARIO_MEDIA_BIFROST.md ruta-inexistente; do
             test "$(curl -sS -o /dev/null -w '%{http_code}' "$origin/$path")" = "404"
