@@ -31,7 +31,7 @@ jobs:
           grep -qi '^content-type: text/html' /tmp/bifrost-headers
           grep -qi '^content-security-policy: ' /tmp/bifrost-headers
           grep -qi '^x-content-type-options: nosniff' /tmp/bifrost-headers
-          for file in producciones.html soluciones.html nosotros.html clientes.html contacto.html styles.css script.js assets/bifrost-logo.png; do
+          for file in $(node scripts/validate-frontend.mjs --public-routes); do
             curl -fsS -o /dev/null "$origin/$file"
           done
           for client in adidas samsung hbo-max salcobrand score; do
