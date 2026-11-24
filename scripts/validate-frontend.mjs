@@ -7,7 +7,9 @@ const servicePages = ["videos-corporativos", "comerciales-y-campanas", "contenid
   "videos-con-ia", "postproduccion-vfx", "cobertura-de-eventos"].map(slug => "producciones/" + slug + ".html");
 const solutionPages = ["marcas-y-empresas", "agencias-y-productoras", "instituciones-publicas",
   "restaurantes-bares-y-comercio"].map(slug => "soluciones/" + slug + ".html");
-const draftPages = [];
+const draftPages = ["caja-los-andes", "innmersive-t", "amarock-producciones", "lola-bar", "philipai", "dai-heladeria",
+  "juntos", "chucao-films", "sfsg", "alaska-films", "brutal-films", "bendita-escena"]
+  .map(slug => "clientes/" + slug + ".html");
 const hubs = ["index.html", "producciones.html", "soluciones.html", "clientes.html", "nosotros.html", "contacto.html"];
 const publicPages = [...hubs, ...servicePages, ...solutionPages];
 const pages = [...publicPages, ...draftPages];
@@ -39,6 +41,8 @@ const stripReview = html => html.replace(/^[ \t]*<!-- review-local -->[ \t]*\r?\
 const sameSet = (a, b) => a.size === b.size && [...a].every(value => b.has(value));
 
 const copyLines = read("Dockerfile").match(/^COPY .+$/gm) ?? [];
+check(copyLines.filter(line => line.startsWith("COPY --from")).join("\n") ===
+  "COPY --from=prepare /srv/bifrost/ /srv/bifrost/", "La imagen final debe usar la etapa de preparación.");
 const copied = new Set(copyLines.filter(line => !line.startsWith("COPY --from=prepare "))
   .flatMap(line => line.trim().split(/\s+/).slice(1, -1)));
 const [firstIgnore, ...excludes] = read(".dockerignore").trim().split(/\r?\n/);
@@ -99,7 +103,9 @@ for (const file of pages) {
     }
   }
   if (servicePages.includes(file)) {
-    check(tags.filter(({ tag }) => tag === "details").length === 2, file + ": se esperaban dos FAQ.");
+    check(tags.filter(({ tag }) => tag === "details").length === 2 &&
+      tags.some(({ tag, attrs }) => tag === "script" && attrs.type === "application/ld+json"),
+      file + ": se esperaban dos FAQ y sus datos estructurados.");
   }
   if (draftPages.includes(file)) {
     check(tags.some(({ attrs }) => attrs.name === "robots" && attrs.content?.includes("noindex")), file + ": borrador indexable.");

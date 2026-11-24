@@ -2,7 +2,7 @@ name: Frontend V1
 
 on:
   push:
-    branches: [develop, main]
+    branches: [develop, main, feature/arquitectura-bifrost-v1]
   pull_request:
     branches: [develop, main]
 
@@ -33,12 +33,22 @@ jobs:
           grep -qi '^x-content-type-options: nosniff' /tmp/bifrost-headers
           for file in $(node scripts/validate-frontend.mjs --public-routes); do
             curl -fsS -o /dev/null "$origin/$file"
+            if [[ "$file" == *.html ]]; then
+              html=$(curl -fsS "$origin/$file")
+              if grep -Eq '<!-- /?review-local -->|href="(\.\./)?clientes/' <<< "$html"; then
+                echo "Contenido de revisión en $file"
+                exit 1
+              fi
+            fi
+          done
+          for file in $(node scripts/validate-frontend.mjs --draft-routes); do
+            test "$(curl -sS -o /dev/null -w '%{http_code}' "$origin/$file")" = "404"
           done
           for client in adidas samsung hbo-max salcobrand score; do
             curl -fsS -o /dev/null "$origin/assets/clientes/posters/$client.webp"
             curl -fsS -o /dev/null "$origin/assets/clientes/logos/$client.svg"
             test "$(curl -sS -o /dev/null -w '%{http_code}' "$origin/assets/clientes/videos/$client.mp4")" = "404"
           done
-          for path in .git/config .env crm/ DEPLOY_BIFROST.md AUDITORIA_BIFROST_V1.md INVENTARIO_MEDIA_BIFROST.md ruta-inexistente; do
+          for path in .git/config .env crm/ bi/ DEPLOY_BIFROST.md AUDITORIA_BIFROST_V1.md ARQUITECTURA_BIFROST_V1.md IMPLEMENTACION_ARQUITECTURA_BIFROST_V1.md INVENTARIO_MEDIA_BIFROST.md ruta-inexistente; do
             test "$(curl -sS -o /dev/null -w '%{http_code}' "$origin/$path")" = "404"
           done
