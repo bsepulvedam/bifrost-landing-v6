@@ -53,7 +53,7 @@ for (const file of pages) {
     if (tag === "img") check("alt" in attrs, file + ": imagen sin alt");
   }
   check(published.has(file), file + ": página fuera del artefacto");
-  check(/^<!doctype html>/i.test(html) && tags[0]?.attrs.lang === "es", file + ": falta doctype o idioma");
+  check(/^<!doctype html>/i.test(html) && ["es", "es-CL"].includes(tags[0]?.attrs.lang), file + ": falta doctype o idioma");
   for (const landmark of ["title", "h1", "header", "nav", "main", "footer"]) {
     check(tags.filter(({ tag }) => tag === landmark).length === 1, file + ": se esperaba un elemento " + landmark);
   }
@@ -94,6 +94,12 @@ for (const [file, { tags, ids }] of documents) {
 const homeTags = documents.get("index.html").tags;
 const players = documents.get("clientes.html").tags.filter(({ tag }) => tag === "video");
 check(!homeTags.some(({ tag }) => tag === "video"), "Inicio debe funcionar sin reproductores.");
+const homeClass = (attrs, name) => attrs.class?.split(/\s+/).includes(name);
+check(!homeTags.some(({ attrs }) => homeClass(attrs, "slider-controls") || homeClass(attrs, "home-links")),
+  "Inicio conserva controles antiguos del carrusel.");
+check(homeTags.some(({ tag, attrs }) => tag === "button" && homeClass(attrs, "slider-toggle") &&
+  attrs["aria-controls"] === "clientSlider" && "aria-pressed" in attrs && "hidden" in attrs),
+  "Falta el botón de pausa accesible del carrusel.");
 check(players.length === clients.length, "Clientes debe incluir un reproductor por marca.");
 for (const client of clients) {
   const src = "assets/clientes/videos/" + client + ".mp4";
