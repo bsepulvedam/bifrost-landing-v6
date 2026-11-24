@@ -21,7 +21,7 @@ if (clientSlider) {
   let ignorePointerClick = false;
 
   const motionPaused = () => reducedMotion.matches && !motionOptIn;
-  const scrollBehavior = () => reducedMotion.matches ? "instant" : "smooth";
+  const scrollBehavior = () => reducedMotion.matches ? "auto" : "smooth";
 
   function step(direction, wrap = false) {
     const left = clientSlider.scrollLeft;
@@ -38,6 +38,7 @@ if (clientSlider) {
   function schedule() {
     window.clearTimeout(timer);
     if (userPaused || motionPaused() || !inView || document.hidden || hovered ||
+        clientSlider.scrollWidth <= clientSlider.clientWidth + 3 ||
         section.contains(document.activeElement) || dragPointerId !== null || touchPointers.size) {
       return;
     }
@@ -83,6 +84,7 @@ if (clientSlider) {
   section.addEventListener("focusin", schedule);
   section.addEventListener("focusout", () => queueMicrotask(schedule));
   document.addEventListener("visibilitychange", schedule);
+  window.addEventListener("resize", schedule, { passive: true });
   clientSlider.addEventListener("wheel", schedule, { passive: true });
   clientSlider.addEventListener("scroll", () => {
     if (touchReadyAt > performance.now()) {

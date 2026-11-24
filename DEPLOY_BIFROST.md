@@ -13,7 +13,7 @@ Se evaluó primero **Static**. Coolify empaqueta los archivos de su directorio b
 | `deploy/nginx.conf` | Atiende las rutas estáticas con 404 real, expone `/healthz`, desactiva listado de directorios, comprime texto, aplica revalidación y añade CSP, `nosniff` y política de referer. |
 | `.github/workflows/frontend.yml` y `scripts/validate-frontend.mjs` | CI de lectura para push y PR. Comprueba sintaxis, referencias locales, elementos básicos de accesibilidad, rutas sensibles registradas y lista pública. En el runner construye y prueba el contenedor en loopback. No contiene credenciales ni llamadas a Coolify. |
 
-La lista pública de la imagen incluye las seis páginas, CSS, JavaScript, las dos imágenes de Bifröst, cinco pósteres WebP y cinco logos SVG. Los MP4 locales se mantienen fuera del contexto de construcción y de Git. La aprobación para publicar cada pieza sigue el inventario editorial. La etiqueta base `stable-alpine` recibe actualizaciones del mantenedor. Registrar el digest probado al promover una versión, fijarlo cuando el flujo requiera reproducibilidad y planificar su actualización. [Nginx unprivileged](https://github.com/nginx/docker-nginx-unprivileged). [Docker, contexto de compilación](https://docs.docker.com/build/concepts/context/#dockerignore-files).
+La lista pública incluye 16 páginas, `robots.txt`, CSS, JavaScript, las dos imágenes de Bifröst, cinco pósteres WebP y cinco logos SVG. La primera etapa elimina los bloques delimitados por `review-local`. La imagen final recibe únicamente el resultado de esa etapa. Las doce fichas, los MP4 locales, los originales y la documentación quedan fuera del contexto de construcción. La aprobación para publicar cada pieza sigue el inventario editorial. Registrar el digest de la imagen base al promover una versión. [Nginx unprivileged](https://github.com/nginx/docker-nginx-unprivileged). [Docker, contexto de compilación](https://docs.docker.com/build/concepts/context/#dockerignore-files).
 
 ## GitHub y ramas
 
@@ -44,7 +44,7 @@ node scripts/validate-frontend.mjs
 git diff --check
 ```
 
-La comprobación estática exige que los cinco reproductores estén en Clientes con `preload="none"` y que sus MP4 se mantengan fuera de Git y del artefacto de Docker. La CI comprueba que los pósteres y logos respondan y que los cinco videos devuelvan 404 en la imagen sin almacenamiento montado.
+La comprobación estática cubre las 28 rutas de desarrollo y las referencias que quedan en la imagen pública. La CI comprueba las 16 rutas servidas, los pósteres y logos, y el HTTP 404 de las doce fichas, las rutas privadas y los cinco videos en una imagen sin almacenamiento montado.
 
 En una máquina con Docker activo, reproducir la prueba de CI:
 
@@ -58,7 +58,7 @@ curl -sS -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8080/.git/config
 docker stop bifrost-v1-check
 ```
 
-Verificar HTTP 200 en las seis páginas y los recursos de la lista, MIME coherente, cabeceras de seguridad y HTTP 404 en rutas privadas, documentación y rutas inexistentes. Con almacenamiento montado, verificar HTTP 206 para una solicitud con `Range`. El workflow ejecuta la prueba del contenedor en el runner.
+Verificar HTTP 200 en las 16 páginas públicas y los recursos de la lista, MIME coherente, cabeceras de seguridad y HTTP 404 en fichas de revisión, rutas privadas, documentación y rutas inexistentes. Con almacenamiento montado, verificar HTTP 206 para una solicitud con `Range`. El workflow ejecuta la prueba del contenedor en el runner.
 
 En una publicación autorizada, abrir **Deployment Logs** y comprobar que la revisión clonada coincide con el SHA previsto de `main`. Consultar **Runtime Logs** para arranque y errores. Verificar HTTPS, `/healthz`, rutas, cabeceras, formulario o enlace de contacto definitivo, imágenes, consola y navegación por teclado. Registrar el SHA y la hora del despliegue en el control de versiones o en el registro de la publicación.
 

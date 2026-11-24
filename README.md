@@ -6,18 +6,18 @@ La web busca transmitir cuidado y oficio. Fondo negro, tipografía grande, pocos
 
 ## El sitio
 
-El sitio tiene seis páginas HTML independientes, conectadas mediante enlaces normales.
+La arquitectura contiene 28 páginas HTML conectadas mediante enlaces normales. El artefacto Docker sirve 16. Las 12 fichas de clientes están disponibles en la revisión local y llevan `noindex, nofollow`.
 
 | Página | Archivo | Contenido actual |
 | --- | --- | --- |
-| Inicio | `index.html` | Carrusel de pósteres y logos con enlaces a Clientes |
-| Producciones audiovisuales + IA | `producciones.html` | Solo el título de la sección |
-| Soluciones | `soluciones.html` | Solo el título de la sección |
-| Nosotros | `nosotros.html` | Solo el título de la sección |
-| Clientes | `clientes.html` | Cinco secciones con reproductores bajo demanda |
-| Contacto | `contacto.html` | Solo el título de la sección |
+| Inicio | `index.html` | Hero, carrusel, servicios y metodología |
+| Producción audiovisual + IA | `producciones.html` y `producciones/*.html` | Hub y seis servicios con preguntas frecuentes |
+| Soluciones | `soluciones.html` y `soluciones/*.html` | Hub y cuatro tipos de cliente |
+| Clientes | `clientes.html` y `clientes/*.html` | Cinco reproductores y doce fichas de revisión local |
+| Nosotros | `nosotros.html` | Estudio, equipo, metodología y datos corporativos |
+| Contacto | `contacto.html` | WhatsApp, oficina e Instagram |
 
-Todas comparten el mismo encabezado. El logo enlaza a Inicio. Debajo del carrusel, Inicio queda junto al enlace a Producciones Audiovisuales+IA. `Contacto` está resaltado con el degradado de la marca y la página actual se marca con `aria-current="page"`.
+El logo enlaza a Inicio. Producción y Soluciones ofrecen submenús en escritorio y llevan a sus hubs en móvil. La sección activa se indica con `aria-current="page"`, y las páginas internas incluyen una ruta de navegación.
 
 ## Diseño e interacción
 
@@ -67,7 +67,8 @@ En la primera visita de una sesión, el logo de la cabecera recibe un resplandor
 
 La galería de clientes del inicio no usa ninguna librería. Es un contenedor con `overflow-x: auto` y `scroll-snap`, al que `script.js` añade lo siguiente:
 
-- Botones anterior y siguiente. Aparecen cuando el script está operativo y hay tarjetas fuera de vista. Al alcanzar un extremo, el botón correspondiente indica que está deshabilitado y conserva el foco.
+- Avance automático cada tres segundos mientras el carrusel está visible y la pestaña activa. El botón Pausar conserva la elección hasta que la persona seleccione Reanudar.
+- Pausas temporales durante el hover, el foco, el arrastre y el desplazamiento táctil. Salir del área visible o cambiar de pestaña también detiene el avance.
 - Arrastre con el mouse mediante pointer events. Con el tacto se usa el desplazamiento nativo del navegador.
 - Flechas izquierda y derecha del teclado cuando el contenedor o una tarjeta tiene el foco.
 
@@ -79,7 +80,7 @@ Cuando el sistema operativo pide reducir el movimiento (`prefers-reduced-motion:
 
 - El logo se muestra sin el resplandor de entrada.
 - Se desactiva el efecto de escala en cards y los desplazamientos en hover.
-- No hay smooth scrolling, ni en CSS ni en los botones y flechas del carrusel.
+- El avance automático empieza pausado. Si se selecciona Reanudar, el avance ocurre sin desplazamiento animado.
 
 El primer Tab ofrece un salto al contenido principal. Los enlaces, los botones y el carrusel tienen un indicador de foco. Si JavaScript no está disponible, el carrusel conserva el desplazamiento nativo. Los efectos hover están dentro de `@media (hover: hover)`, así que en pantallas táctiles no se quedan pegados tras tocar.
 
@@ -101,6 +102,10 @@ bifrost-landing-v6/
 ├── nosotros.html
 ├── clientes.html
 ├── contacto.html
+├── producciones/          Seis páginas de servicio
+├── soluciones/            Cuatro soluciones
+├── clientes/              Doce fichas de revisión local
+├── robots.txt
 ├── styles.css             Estilos de todo el sitio
 ├── script.js              Resplandor del logo y carrusel
 ├── README.md
@@ -119,14 +124,14 @@ cd bifrost-landing-v6
 El sitio se puede abrir desde `index.html`. Un servidor local permite probar la navegación, el video y el almacenamiento de sesión bajo el mismo origen HTTP. Puedes usar Live Server en Visual Studio Code o ejecutar este comando desde la carpeta del proyecto.
 
 ```bash
-python -m http.server 8000
+python -m http.server 8000 --bind 127.0.0.1
 ```
 
 Abre `http://localhost:8000`. Para volver a ver el resplandor después de la primera visita, abre el sitio en una pestaña nueva.
 
 ## Cómo trabajar con el proyecto
 
-El contenido y la estructura están en los HTML. El encabezado y el footer se repiten en las seis páginas, así que un cambio en la navegación hay que hacerlo en cada archivo. Los estilos están en `styles.css`. El resplandor del logo, el carrusel y los avisos de reproducción se inicializan en `script.js`. Los medios se guardan en `assets/`.
+El contenido y la estructura están en los HTML. Localiza cada cápsula con `data-capsule` y cada elemento repetido con `data-item`. El encabezado y el footer se repiten en las 28 páginas. El validador revisa el orden y las rutas de la navegación. Los estilos se comparten en `styles.css` y las interacciones en `script.js`.
 
 Antes de tocar una animación, conviene reutilizar las variables de motion en lugar de escribir tiempos nuevos. Si un hover necesita una duración, que use `--motion-normal` y `--ease-apple`, no algo como `transition: 327ms ease`. Con el tiempo, valores sueltos hacen que cada componente se mueva distinto, y justo eso es lo que el sistema evita.
 
@@ -142,6 +147,6 @@ La guía de [despliegue](DEPLOY_BIFROST.md) documenta Coolify, el contenedor y l
 
 La versión actual mantiene la estructura original de Bifröst y concentra los últimos cambios en la experiencia de interacción. La tipografía, las transiciones y las microinteracciones comparten ahora un mismo lenguaje de movimiento, sin cambiar la composición general del sitio.
 
-Las páginas de Producciones, Soluciones, Nosotros y Contacto aún esperan contenido. Los cinco reproductores de Clientes se pueden probar localmente con las copias optimizadas.
+Los cinco reproductores de Clientes se pueden probar localmente con las copias optimizadas. El [informe de implementación](IMPLEMENTACION_ARQUITECTURA_BIFROST_V1.md) detalla las decisiones pendientes para producción.
 
 El proyecto sigue siendo deliberadamente pequeño: HTML, CSS y JavaScript nativo. Si su complejidad crece, se podrá reevaluar esa decisión, pero hoy no hay una necesidad técnica de introducir un framework.

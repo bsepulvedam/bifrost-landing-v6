@@ -32,7 +32,7 @@ jobs:
           grep -qi '^content-security-policy: ' /tmp/bifrost-headers
           grep -qi '^x-content-type-options: nosniff' /tmp/bifrost-headers
           for file in $(node scripts/validate-frontend.mjs --public-routes); do
-            curl -fsS -o /dev/null "$origin/$file"
+            test "$(curl -sS -o /dev/null -w '%{http_code}' "$origin/$file")" = "200"
             if [[ "$file" == *.html ]]; then
               html=$(curl -fsS "$origin/$file")
               if grep -Eq '<!-- /?review-local -->|href="(\.\./)?clientes/' <<< "$html"; then
