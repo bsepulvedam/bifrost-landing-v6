@@ -25,13 +25,35 @@ jobs:
           docker run --rm -d --name bifrost-ci -p 127.0.0.1::8080 bifrost-ci
           trap 'docker stop bifrost-ci' EXIT
           docker exec bifrost-ci nginx -t
+          uid=$(docker exec bifrost-ci id -u)
+          gid=$(docker exec bifrost-ci id -g)
+          test "$uid" -gt 0
+          test "$gid" -gt 0
+          printf 'Usuario de la imagen UID=%s GID=%s\n' "$uid" "$gid"
+          internal_health=$(docker exec bifrost-ci sh -ec '
+            if command -v curl >/dev/null; then
+              curl -fsS http://127.0.0.1:8080/healthz
+            else
+              wget -qO- http://127.0.0.1:8080/healthz
+            fi
+          ')
+          test "$internal_health" = "ok"
+          public_files=$(node scripts/validate-frontend.mjs --public-routes)
+          image_files=$(docker exec bifrost-ci sh -c 'cd /srv/bifrost && find . -type f | sed "s|^./||"' | sort)
+          diff -u <(sort <<< "$public_files") <(printf '%s\n' "$image_files")
+          test -z "$(docker exec bifrost-ci find /srv/bifrost -type l)"
           origin="http://$(docker port bifrost-ci 8080/tcp)"
-          curl -fsS --retry 5 --retry-connrefused "$origin/healthz"
+          test "$(curl -fsS --retry 5 --retry-connrefused "$origin/healthz")" = "ok"
           curl -fsSI "$origin/" | tee /tmp/bifrost-headers
           grep -qi '^content-type: text/html' /tmp/bifrost-headers
           grep -qi '^content-security-policy: ' /tmp/bifrost-headers
           grep -qi '^x-content-type-options: nosniff' /tmp/bifrost-headers
-          for file in $(node scripts/validate-frontend.mjs --public-routes); do
+          grep -qi '^referrer-policy: strict-origin-when-cross-origin' /tmp/bifrost-headers
+          grep -qi '^cache-control: no-cache' /tmp/bifrost-headers
+          css_headers=$(curl -fsS -H 'Accept-Encoding: gzip' -D - -o /dev/null "$origin/styles.css")
+          grep -qi '^content-type: text/css' <<< "$css_headers"
+          grep -qi '^content-encoding: gzip' <<< "$css_headers"
+          for file in $public_files; do
             test "$(curl -sS -o /dev/null -w '%{http_code}' "$origin/$file")" = "200"
             if [[ "$file" == *.html ]]; then
               html=$(curl -fsS "$origin/$file")
@@ -42,13 +64,37 @@ jobs:
             fi
           done
           for file in $(node scripts/validate-frontend.mjs --draft-routes); do
-            test "$(curl -sS -o /dev/null -w '%{http_code}' "$origin/$file")" = "404"
+            for path in "$file" "${file%.html}" "${file%.html}/" "assets/../$file"; do
+              test "$(curl --path-as-is -sS -o /dev/null -w '%{http_code}' "$origin/$path")" = "404"
+            done
           done
           for client in adidas samsung hbo-max salcobrand score; do
-            curl -fsS -o /dev/null "$origin/assets/clientes/posters/$client.webp"
-            curl -fsS -o /dev/null "$origin/assets/clientes/logos/$client.svg"
+            poster_headers=$(curl -fsSI "$origin/assets/clientes/posters/$client.webp")
+            grep -qi '^content-type: image/webp' <<< "$poster_headers"
+            logo_headers=$(curl -fsSI "$origin/assets/clientes/logos/$client.svg")
+            grep -qi '^content-type: image/svg+xml' <<< "$logo_headers"
             test "$(curl -sS -o /dev/null -w '%{http_code}' "$origin/assets/clientes/videos/$client.mp4")" = "404"
           done
-          for path in .git/config .env crm/ bi/ DEPLOY_BIFROST.md AUDITORIA_BIFROST_V1.md ARQUITECTURA_BIFROST_V1.md IMPLEMENTACION_ARQUITECTURA_BIFROST_V1.md INVENTARIO_MEDIA_BIFROST.md ruta-inexistente; do
+          for path in .git/config .env crm/ bi/ DEPLOY_BIFROST.md STAGING_BIFROST_HOSTINGER.md AUDITORIA_BIFROST_V1.md ARQUITECTURA_BIFROST_V1.md IMPLEMENTACION_ARQUITECTURA_BIFROST_V1.md INVENTARIO_MEDIA_BIFROST.md ruta-inexistente; do
             test "$(curl -sS -o /dev/null -w '%{http_code}' "$origin/$path")" = "404"
           done
+      - name: Probar HTTP Range con un montaje de solo lectura
+        run: |
+          fixture=$(mktemp -d)
+          trap 'docker stop bifrost-ci-range >/dev/null 2>&1 || true; rm -f -- "$fixture/range-fixture.mp4"; rmdir -- "$fixture"' EXIT
+          chmod 0755 "$fixture"
+          printf '0123456789' > "$fixture/range-fixture.mp4"
+          chmod 0644 "$fixture/range-fixture.mp4"
+          target=/srv/bifrost/assets/clientes/videos
+          docker run --rm -d --name bifrost-ci-range -p 127.0.0.1::8080 \
+            --mount "type=bind,source=$fixture,target=$target,readonly" bifrost-ci
+          mount=$(docker inspect --format '{{range .Mounts}}{{printf "%s %s %t" .Type .Destination .RW}}{{end}}' bifrost-ci-range)
+          test "$mount" = "bind $target false"
+          docker exec bifrost-ci-range test -r "$target/range-fixture.mp4"
+          origin="http://$(docker port bifrost-ci-range 8080/tcp)"
+          response=$(curl -fsSi --retry 5 --retry-connrefused --range 0-3 "$origin/assets/clientes/videos/range-fixture.mp4")
+          response=$(tr -d '\r' <<< "$response")
+          grep -q '^HTTP/1.1 206 ' <<< "$response"
+          grep -qi '^content-type: video/mp4$' <<< "$response"
+          grep -qi '^content-range: bytes 0-3/10$' <<< "$response"
+          test "$(tail -n 1 <<< "$response")" = "0123"
